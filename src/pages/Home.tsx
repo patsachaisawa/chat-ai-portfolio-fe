@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Bot, ArrowRight, Code2, Database, Brain, Sparkles, FolderGit2, Mail, Terminal, User } from 'lucide-react';
 
-// 1. โครงสร้างข้อมูลสมาชิกในทีม
 interface Project {
   title: string;
   category: string;
@@ -103,8 +102,6 @@ const teamMembers: Member[] = [
 
 export default function Home() {
   const [selectedMemberId, setSelectedMemberId] = useState<string>('patsachai');
-
-  // ดึงข้อมูลสมาชิกที่กำลังเลือกอยู่
   const currentMember = teamMembers.find((m) => m.id === selectedMemberId) || teamMembers[0];
 
   return (
@@ -150,6 +147,7 @@ export default function Home() {
           <p className="text-slate-400 text-base md:text-lg max-w-xl leading-relaxed">
             ยินดีต้อนรับสู่พื้นที่รวบรวมทักษะและผลงานเด่น สามารถเลือกดูโปรไฟล์ของสมาชิกในทีม หรือทดลองพิมพ์สอบถามข้อมูลด้วย AI Assistant ได้ทันที
           </p>
+          
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 pt-2">
             <Link
               to="/chat"
@@ -187,7 +185,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Member Selection Tabs (ส่วนปุ่มกดเลือกสมาชิก) */}
+      {/* Member Selection Tabs */}
       <section className="max-w-6xl mx-auto px-6 pt-6 pb-4">
         <div className="flex flex-col items-center justify-center space-y-3">
           <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
@@ -212,7 +210,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Tech Stack Section (แสดงเฉพาะของคนที่เลือก) */}
+      {/* Tech Stack Section */}
       <section id="skills" className="border-t border-slate-900 bg-slate-950 py-16">
         <div className="max-w-6xl mx-auto px-6">
           <h2 className="text-2xl font-bold text-white text-center mb-2 flex items-center justify-center gap-2">
@@ -239,7 +237,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Projects Section (แสดงเฉพาะของคนที่เลือก) */}
+      {/* Projects Section */}
       <section id="projects" className="py-16 max-w-6xl mx-auto px-6">
         <h2 className="text-2xl font-bold text-white text-center mb-2 flex items-center justify-center gap-2">
           <FolderGit2 className="w-6 h-6 text-blue-500" />
@@ -256,21 +254,37 @@ export default function Home() {
               className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between hover:border-slate-700 transition-colors"
             >
               <div>
-                <span className={`text-xs font-semibold uppercase tracking-wider ${project.tagColor}`}>
+                <span className={`text-xs font-semibold ${project.tagColor} uppercase tracking-wider`}>
                   {project.category}
                 </span>
-                <h3 className="mt-3 text-lg font-semibold text-white">{project.title}</h3>
-                <p className="mt-2 text-sm text-slate-400 leading-relaxed">{project.desc}</p>
+                <h3 className="text-lg font-bold text-white mt-1 mb-2">{project.title}</h3>
+                <p className="text-sm text-slate-400 leading-relaxed mb-4">{project.desc}</p>
               </div>
-              {project.link && (
-                <Link to={project.link} className="mt-5 inline-flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300">
-                  ดูรายละเอียด <ArrowRight className="w-4 h-4" />
+              {project.link ? (
+                <Link to={project.link} className="text-xs font-medium text-blue-400 hover:text-blue-300 flex items-center gap-1">
+                  <span>ทดลองใช้งาน</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
+              ) : (
+                <span className="text-xs font-medium text-slate-500">ผลงานโดย {currentMember.name}</span>
               )}
             </div>
           ))}
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="border-t border-slate-900 py-8 text-center text-xs text-slate-500">
+        <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p>© 2026 AI Innovators Team. All rights reserved.</p>
+          <div className="flex items-center gap-4">
+            <a href="mailto:Patsachai.sawa@bumail.net" className="hover:text-slate-300 transition-colors flex items-center gap-1">
+              <Mail className="w-3.5 h-3.5" />
+              <span>Contact</span>
+            </a>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
