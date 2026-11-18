@@ -3,6 +3,11 @@ import ReactMarkdown from 'react-markdown';
 import { Send, Bot, User, RefreshCw, Sparkles, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+// ดึง API URL จาก env (ตั้งใน Vercel: VITE_API_URL=https://chat-ai-portfolio-be-pubg.onrender.com)
+// ตัด slash ท้ายออก กันเกิด //api/chat
+const API_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/+$/, '');
+const CHAT_ENDPOINT = `${API_BASE_URL}/api/chat`;
+
 interface Message {
   id: string;
   sender: 'user' | 'assistant';
@@ -50,7 +55,7 @@ export default function Chat() {
     setLoading(true);
 
     try {
-      const res = await fetch('http://localhost:5000/api/chat', {
+      const res = await fetch(CHAT_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -59,9 +64,16 @@ export default function Chat() {
         }),
       });
 
-      const data = await res.json();
+      // อ่านเป็น text ก่อน กัน res.json() พังเมื่อได้ HTML/ข้อความว่าง (เช่น หน้า error ของ Render)
+      const raw = await res.text();
+      let data: { reply?: string; error?: string } = {};
+      try {
+        data = raw ? JSON.parse(raw) : {};
+      } catch {
+        console.error('[Chat] Response ไม่ใช่ JSON:', { url: CHAT_ENDPOINT, status: res.status, body: raw.slice(0, 300) });
+      }
 
-      if (res.ok) {
+      if (res.ok && data.reply) {
         setMessages((prev) => [
           ...prev,
           {
@@ -71,9 +83,11 @@ export default function Chat() {
           },
         ]);
       } else {
-        throw new Error(data.error || 'เกิดข้อผิดพลาด');
+        throw new Error(`HTTP ${res.status}: ${data.error || 'เกิดข้อผิดพลาดจากเซิร์ฟเวอร์'}`);
       }
     } catch (err) {
+      // TypeError: Failed to fetch = เชื่อมต่อไม่ได้ / โดน CORS บล็อก / URL ผิด / Render กำลังตื่น
+      console.error('[Chat] Request ล้มเหลว:', { url: CHAT_ENDPOINT, error: err });
       setMessages((prev) => [
         ...prev,
         {
