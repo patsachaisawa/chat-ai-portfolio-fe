@@ -95,6 +95,7 @@ export default function Chat() {
       console.error('[Chat] Request ล้มเหลว:', { url: CHAT_ENDPOINT, error: err });
       const isTimeout = err instanceof DOMException && err.name === 'AbortError';
       const isBusy = err instanceof Error && err.message.startsWith('HTTP 503');
+      const isQuota = err instanceof Error && err.message.startsWith('HTTP 429');
       setMessages((prev) => [
         ...prev,
         {
@@ -102,7 +103,9 @@ export default function Chat() {
           sender: 'assistant',
           text: isTimeout
             ? 'ขออภัยครับ เซิร์ฟเวอร์ตอบช้าเกินไป กรุณาลองใหม่อีกครั้งในอีกสักครู่'
-            : isBusy
+            : isQuota
+              ? 'ขออภัยครับ โควตาการใช้งาน AI ของวันนี้เต็มแล้ว กรุณาลองใหม่ภายหลัง'
+              : isBusy
               ? 'ขออภัยครับ ระบบ AI กำลังมีผู้ใช้งานจำนวนมาก กรุณาลองใหม่อีกครั้งในอีกสักครู่'
               : 'ขออภัยครับ ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์หลังบ้านได้ในขณะนี้',
         },
