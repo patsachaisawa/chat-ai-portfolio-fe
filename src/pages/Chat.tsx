@@ -54,10 +54,15 @@ export default function Chat() {
     if (!customMessage) setInput('');
     setLoading(true);
 
+    // กันค้าง: ยกเลิกคำขอถ้าเกิน 75 วินาที (เผื่อ Render แพลนฟรีกำลังตื่น)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 75_000);
+
     try {
       const res = await fetch(CHAT_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
         body: JSON.stringify({
           sessionId: sessionId,
           message: textToSend,
@@ -88,15 +93,22 @@ export default function Chat() {
     } catch (err) {
       // TypeError: Failed to fetch = เชื่อมต่อไม่ได้ / โดน CORS บล็อก / URL ผิด / Render กำลังตื่น
       console.error('[Chat] Request ล้มเหลว:', { url: CHAT_ENDPOINT, error: err });
+      const isTimeout = err instanceof DOMException && err.name === 'AbortError';
+      const isBusy = err instanceof Error && err.message.startsWith('HTTP 503');
       setMessages((prev) => [
         ...prev,
         {
           id: (Date.now() + 1).toString(),
           sender: 'assistant',
-          text: 'ขออภัยครับ ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์หลังบ้านได้ในขณะนี้',
+          text: isTimeout
+            ? 'ขออภัยครับ เซิร์ฟเวอร์ตอบช้าเกินไป กรุณาลองใหม่อีกครั้งในอีกสักครู่'
+            : isBusy
+              ? 'ขออภัยครับ ระบบ AI กำลังมีผู้ใช้งานจำนวนมาก กรุณาลองใหม่อีกครั้งในอีกสักครู่'
+              : 'ขออภัยครับ ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์หลังบ้านได้ในขณะนี้',
         },
       ]);
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
     }
   };
