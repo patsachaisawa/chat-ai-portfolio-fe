@@ -400,7 +400,7 @@ export default function Chat() {
               e.preventDefault();
               void handleSend();
             }}
-            className="flex items-stretch gap-3 pb-1"
+            className="flex items-stretch gap-3 pb-1 pr-12 lg:pr-0"
           >
             <div className="pixel-box pixel-box--white flex-1 flex items-center px-3 focus-within:[--pb-border:#ffd23f]">
               <span className="font-pixel text-xs text-hero-gold mr-2" aria-hidden="true">
