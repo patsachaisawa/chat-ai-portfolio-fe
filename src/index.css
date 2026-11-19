@@ -1,1 +1,510 @@
 @import "tailwindcss";
+
+@theme {
+  --font-pixel: "Press Start 2P", "Chakra Petch", ui-monospace, monospace;
+  --font-game: "Chakra Petch", ui-sans-serif, system-ui, sans-serif;
+  --color-night: #0b1020;
+  --color-ink: #121a3a;
+  --color-hero-cyan: #27c4e8;
+  --color-hero-gold: #ffd23f;
+  --color-hero-orange: #ff7a1a;
+  --color-hero-pink: #ff4d8d;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: #0b1020;
+  color: #e8ecff;
+  font-family: var(--font-game);
+}
+
+/* ===== Components (อยู่ใน layer เพื่อให้ utility ของ Tailwind override ได้) ===== */
+@layer components {
+  /* กล่องพิกเซล: ขอบหยักด้วย box-shadow */
+  .pixel-box {
+    --pb-bg: #121a3a;
+    --pb-border: #e8ecff;
+    position: relative;
+    margin: 4px;
+    background: var(--pb-bg);
+    box-shadow:
+      0 -4px 0 0 var(--pb-border),
+      0 4px 0 0 var(--pb-border),
+      -4px 0 0 0 var(--pb-border),
+      4px 0 0 0 var(--pb-border),
+      8px 8px 0 0 rgba(0, 0, 0, 0.45);
+  }
+  .pixel-box--cyan {
+    --pb-border: #27c4e8;
+  }
+  .pixel-box--gold {
+    --pb-border: #ffd23f;
+  }
+  .pixel-box--pink {
+    --pb-border: #ff4d8d;
+  }
+  .pixel-box--white {
+    --pb-border: #e8ecff;
+    --pb-bg: #0b1020;
+  }
+
+  /* ปุ่มพิกเซล */
+  .pixel-btn {
+    --pb-bg: #1c2760;
+    --pb-border: #e8ecff;
+    --pb-fg: #e8ecff;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 4px;
+    padding: 0.7rem 1.1rem;
+    background: var(--pb-bg);
+    color: var(--pb-fg);
+    box-shadow:
+      0 -4px 0 0 var(--pb-border),
+      0 4px 0 0 var(--pb-border),
+      -4px 0 0 0 var(--pb-border),
+      4px 0 0 0 var(--pb-border),
+      6px 6px 0 0 rgba(0, 0, 0, 0.45);
+    cursor: pointer;
+    text-decoration: none;
+    user-select: none;
+    transition: transform 0.06s steps(2);
+  }
+  .pixel-btn:hover:not(:disabled) {
+    --pb-bg: #2a3a96;
+    transform: translate(-2px, -2px);
+  }
+  .pixel-btn:active:not(:disabled) {
+    transform: translate(4px, 4px);
+    box-shadow:
+      0 -4px 0 0 var(--pb-border),
+      0 4px 0 0 var(--pb-border),
+      -4px 0 0 0 var(--pb-border),
+      4px 0 0 0 var(--pb-border);
+  }
+  .pixel-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .pixel-btn--gold {
+    --pb-bg: #ffd23f;
+    --pb-fg: #0b1020;
+    --pb-border: #fff3b0;
+  }
+  .pixel-btn--gold:hover:not(:disabled) {
+    --pb-bg: #ffe27a;
+  }
+  .pixel-btn--sm {
+    padding: 0.4rem 0.7rem;
+    font-size: 0.75rem;
+  }
+
+  /* แถบด้านบน */
+  .pixel-bar {
+    background: rgba(11, 16, 32, 0.96);
+    border-bottom: 4px solid #e8ecff;
+    box-shadow: 0 4px 0 0 rgba(0, 0, 0, 0.4);
+  }
+
+  .pixel-tag {
+    display: inline-block;
+    padding: 0.35rem 0.6rem;
+    font-family: var(--font-pixel);
+    font-size: 0.6rem;
+    letter-spacing: 0.05em;
+    color: #0b1020;
+    background: #27c4e8;
+    box-shadow: 3px 3px 0 0 rgba(0, 0, 0, 0.5);
+  }
+
+  .pixel-title {
+    color: #ffd23f;
+    letter-spacing: 0.04em;
+    text-shadow:
+      3px 3px 0 #c9560a,
+      6px 6px 0 #0b1020;
+  }
+
+  /* ป้ายชื่อบนกล่องบทสนทนา */
+  .name-tag {
+    position: absolute;
+    top: -14px;
+    left: 14px;
+    padding: 3px 8px;
+    font-size: 0.55rem;
+    letter-spacing: 0.05em;
+    color: #0b1020;
+    background: #27c4e8;
+  }
+  .name-tag--user {
+    left: auto;
+    right: 14px;
+    background: #ffd23f;
+  }
+
+  /* เคอร์เซอร์พิมพ์ดีด และลูกศรบอกว่าพิมพ์จบแล้ว */
+  .type-cursor::after {
+    content: "▌";
+    margin-left: 2px;
+    color: #ffd23f;
+    animation: blink-soft 0.6s steps(2) infinite;
+  }
+  .dialog-next::after {
+    content: " ▼";
+    color: #ffd23f;
+    animation: blink-soft 0.8s steps(2) infinite;
+  }
+
+  /* การ์ดเลือกผู้เล่น */
+  .select-card {
+    --pb-border: #3a4a8c;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    min-width: 190px;
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    color: inherit;
+    transition: transform 0.08s steps(2);
+  }
+  .select-card:hover {
+    --pb-border: #27c4e8;
+    transform: translateY(-3px);
+  }
+  .select-card.is-active {
+    --pb-border: #ffd23f;
+    transform: translateY(-6px);
+  }
+
+  /* การ์ดทักษะ + XP bar */
+  .skill-chip {
+    opacity: 0;
+    padding: 0.2rem 0.55rem;
+    font-size: 0.75rem;
+    color: #cfd8ff;
+    background: #0b1020;
+    border: 2px solid #3a4a8c;
+  }
+  .is-in .skill-chip {
+    animation: pop-in 0.35s steps(4) both;
+  }
+  .xp-bar {
+    height: 14px;
+    padding: 2px;
+    background: #0b1020;
+    border: 3px solid #e8ecff;
+  }
+  .xp-fill {
+    height: 100%;
+    width: 0;
+    background: repeating-linear-gradient(90deg, #27c4e8 0 8px, #1b8fb0 8px 10px);
+    transition: width 1s steps(10);
+  }
+  .icon-tile {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    background: #0b1020;
+    border: 3px solid currentColor;
+  }
+
+  /* การ์ดภารกิจ */
+  .quest-card {
+    transition: transform 0.08s steps(2);
+  }
+  .quest-card:hover {
+    transform: translate(-3px, -3px);
+  }
+
+  /* เวทีฮีโร่ */
+  .stage-floor {
+    height: 24px;
+    background: repeating-linear-gradient(90deg, #2a8a4a 0 16px, #23723d 16px 32px);
+    border-top: 4px solid #5fe38a;
+  }
+  .speech {
+    position: relative;
+    padding: 0.5rem 0.8rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #0b1020;
+    background: #fff;
+    box-shadow:
+      0 -3px 0 #0b1020,
+      0 3px 0 #0b1020,
+      -3px 0 0 #0b1020,
+      3px 0 0 #0b1020;
+  }
+  .speech::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -12px;
+    width: 10px;
+    height: 10px;
+    margin-left: -5px;
+    background: #fff;
+    box-shadow: 3px 3px 0 #0b1020;
+  }
+  .think-bubble {
+    position: absolute;
+    top: -26px;
+    right: -18px;
+    padding: 0.3rem 0.5rem;
+    font-size: 0.8rem;
+    color: #0b1020;
+    background: #fff;
+    box-shadow: 3px 3px 0 #0b1020;
+    animation: blink-soft 0.8s steps(2) infinite;
+  }
+  .hero-bob {
+    animation: hero-bob 1s steps(2) infinite;
+  }
+  .hero-jump {
+    animation: hero-jump 0.5s steps(6) 1;
+  }
+
+  /* จุดโหลด */
+  .loading-dots i {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-right: 4px;
+    background: #ffd23f;
+    animation: dot-bounce 0.8s steps(2) infinite;
+  }
+  .loading-dots i:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+  .loading-dots i:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+
+  .blink-soft {
+    animation: blink-soft 1s steps(2) infinite;
+  }
+
+  /* แถบเลื่อนสไตล์พิกเซล */
+  .pixel-scroll {
+    scrollbar-color: #ffd23f #0b1020;
+  }
+  .pixel-scroll::-webkit-scrollbar {
+    width: 12px;
+  }
+  .pixel-scroll::-webkit-scrollbar-track {
+    background: #0b1020;
+  }
+  .pixel-scroll::-webkit-scrollbar-thumb {
+    background: #ffd23f;
+    border: 3px solid #0b1020;
+  }
+
+  /* ===== ฉากหลัง ===== */
+  .pixel-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+    background: linear-gradient(to bottom, #070b1f 0%, #121a4a 45%, #3a2a66 75%, #c9560a 100%);
+  }
+  .pixel-stars {
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(2px 2px at 20px 30px, #fff, transparent),
+      radial-gradient(2px 2px at 140px 80px, #ffd23f, transparent),
+      radial-gradient(2px 2px at 90px 150px, #fff, transparent),
+      radial-gradient(2px 2px at 200px 40px, #9fe9ff, transparent);
+    background-size: 240px 200px;
+    animation: twinkle 3s steps(2) infinite;
+  }
+  .pixel-sun {
+    position: absolute;
+    right: 8%;
+    top: 12%;
+  }
+  .pixel-cloud {
+    position: absolute;
+    left: -20vw;
+    opacity: 0.9;
+    animation: drift linear infinite;
+  }
+  .pixel-skyline {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-repeat: repeat-x;
+    background-position: left bottom;
+    image-rendering: pixelated;
+  }
+  .pixel-skyline--far {
+    height: 192px;
+    background-size: 480px 192px;
+    opacity: 0.55;
+  }
+  .pixel-skyline--near {
+    height: 128px;
+    background-size: 320px 128px;
+  }
+  .crt {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    pointer-events: none;
+    background: repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 3px);
+  }
+
+  /* ===== Toast และเอฟเฟกต์ Power-up ===== */
+  .toast {
+    animation: toast-in 0.4s steps(5) both;
+  }
+  .powerup {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .powerup-flash {
+    position: absolute;
+    inset: 0;
+    background: #fff;
+    animation: flash 0.9s steps(6) both;
+  }
+  .powerup-text {
+    position: absolute;
+    left: 50%;
+    top: 40%;
+    font-size: clamp(1.5rem, 6vw, 3.5rem);
+    color: #ffd23f;
+    text-shadow:
+      4px 4px 0 #c9560a,
+      8px 8px 0 #0b1020;
+    transform: translate(-50%, -50%);
+    animation: power-text 2.2s steps(12) both;
+  }
+  .confetti {
+    position: absolute;
+    top: -20px;
+    animation: fall linear both;
+  }
+}
+
+/* ===== Keyframes ===== */
+@keyframes blink-soft {
+  50% {
+    opacity: 0.35;
+  }
+}
+@keyframes hero-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+@keyframes hero-jump {
+  0% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-36px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+@keyframes dot-bounce {
+  50% {
+    transform: translateY(-6px);
+  }
+}
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes twinkle {
+  50% {
+    opacity: 0.45;
+  }
+}
+@keyframes drift {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(150vw);
+  }
+}
+@keyframes toast-in {
+  from {
+    transform: translateX(120%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+@keyframes flash {
+  0% {
+    opacity: 0.95;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes power-text {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.3);
+  }
+  15% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.15);
+  }
+  25% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -70%) scale(1);
+  }
+}
+@keyframes fall {
+  to {
+    transform: translateY(110vh) rotate(360deg);
+  }
+}
+
+/* เคารพการตั้งค่าลดการเคลื่อนไหวของผู้ใช้ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
