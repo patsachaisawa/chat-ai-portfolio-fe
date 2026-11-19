@@ -508,3 +508,87 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* ===== ส่วนเพิ่ม: บอสด่านสุดท้าย, แถบ HP, ภารกิจ ===== */
+@layer components {
+  .pixel-box--red {
+    --pb-border: #ff3b3b;
+  }
+  .name-tag--boss {
+    color: #fff;
+    background: #ff3b3b;
+  }
+
+  .hp-bar {
+    height: 14px;
+    padding: 2px;
+    background: #0b1020;
+    border: 3px solid #e8ecff;
+  }
+  .hp-fill {
+    height: 100%;
+    transition: width 0.8s steps(10);
+  }
+  .hp-ok {
+    background: repeating-linear-gradient(90deg, #3ddc84 0 8px, #2aa862 8px 10px);
+  }
+  .hp-warn {
+    background: repeating-linear-gradient(90deg, #ffd23f 0 8px, #d9a900 8px 10px);
+  }
+  .hp-low {
+    background: repeating-linear-gradient(90deg, #ff3b3b 0 8px, #b02020 8px 10px);
+  }
+
+  .boss-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    pointer-events: none;
+    background: rgba(120, 0, 0, 0.9);
+    animation: boss-in 1.7s steps(12) both;
+  }
+  .boss-text {
+    font-size: clamp(1.4rem, 6vw, 3.2rem);
+    line-height: 1.5;
+    color: #fff;
+    text-shadow:
+      4px 4px 0 #b00000,
+      8px 8px 0 #0b1020;
+  }
+  .shake {
+    animation: shake 0.4s steps(4) infinite;
+  }
+}
+
+@keyframes boss-in {
+  0% {
+    opacity: 0;
+  }
+  10%,
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes shake {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-6px, 3px);
+  }
+  50% {
+    transform: translate(6px, -3px);
+  }
+  75% {
+    transform: translate(-4px, -2px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
