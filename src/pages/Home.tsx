@@ -35,7 +35,7 @@ interface Member {
 const teamMembers: Member[] = [
   {
     id: 'patsachai',
-    name: 'ภัทษชัย สว่างกัลป์',
+    name: 'ภัทษชัย สว่างกัลป์ (เพชร)',
     role: 'AI & Data Science Student / Full-Stack Developer',
     skills: [
       {
@@ -99,6 +99,13 @@ const teamMembers: Member[] = [
         tagColor: 'text-purple-400',
         desc: 'สร้าง Automated Data Pipeline และแดชบอร์ดวิเคราะห์ข้อมูลเชิงตอบโต้',
       },
+      {
+        title: 'AI Portfolio Chatbot',
+        category: 'TEAM PROJECT',
+        tagColor: 'text-blue-400',
+        desc: 'ระบบแชตบอทอัจฉริยะตอบคำถามข้อมูลโปรไฟล์ของทีม พัฒนาร่วมกันด้วย React, Express, Supabase และ Gemini API',
+        link: '/chat',
+      },
     ],
   },
   {
@@ -133,6 +140,13 @@ const teamMembers: Member[] = [
         category: 'DATA ANALYTICS',
         tagColor: 'text-emerald-400',
         desc: 'ระบบเก็บและวิเคราะห์ข้อมูลภารกิจบินโดรน เช่น เส้นทางบิน พิกัด GPS ความสูง แบตเตอรี่ และภาพถ่ายทางอากาศ พร้อมแดชบอร์ดแสดงผลข้อมูลภารกิจ',
+      },
+      {
+        title: 'AI Portfolio Chatbot',
+        category: 'TEAM PROJECT',
+        tagColor: 'text-blue-400',
+        desc: 'ระบบแชตบอทอัจฉริยะตอบคำถามข้อมูลโปรไฟล์ของทีม พัฒนาร่วมกันด้วย React, Express, Supabase และ Gemini API',
+        link: '/chat',
       },
     ],
   },
