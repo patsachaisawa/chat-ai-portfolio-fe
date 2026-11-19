@@ -205,11 +205,7 @@ function TitleScreen({ onStart }: { onStart: () => void }) {
     <section className="min-h-dvh flex flex-col items-center justify-center text-center px-6 py-10 gap-8">
       <div className="space-y-4">
         <p className="font-pixel text-[10px] md:text-xs text-hero-cyan tracking-widest">★ A PIXEL HERO ADVENTURE ★</p>
-        <h1 className="pixel-title font-pixel text-2xl sm:text-4xl md:text-6xl leading-tight">
-          AI
-          <br />
-          INNOVATORS
-        </h1>
+        <h1 className="pixel-title !font-game font-bold text-5xl sm:text-7xl md:text-8xl leading-tight">ยังไม่ได้นอน</h1>
         <p className="font-pixel text-[10px] md:text-sm text-hero-gold">PIXEL HERO QUEST</p>
       </div>
 
