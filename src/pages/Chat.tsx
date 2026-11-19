@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Link } from 'react-router-dom';
+import EnergyBar from '../components/EnergyBar';
 import PixelHero from '../components/PixelHero';
 import type { HeroMood } from '../components/PixelHero';
 import { useGameFx } from '../lib/gameFx';
-import { useTypewriter } from '../lib/useTypewriter';
+import { BOSS_LABEL, BOSS_PROMPT, MISSIONS, loadCleared, saveCleared } from '../lib/missions';
 import { sfx } from '../lib/sfx';
+import { useQuota } from '../lib/useQuota';
+import { useTypewriter } from '../lib/useTypewriter';
 
 // ดึง API URL จาก env (ตั้งใน Vercel: VITE_API_URL=https://chat-ai-portfolio-be-pubg.onrender.com)
 // ตัด slash ท้ายออก กันเกิด //api/chat
@@ -16,23 +19,35 @@ interface Message {
   id: string;
   sender: 'user' | 'assistant';
   text: string;
+  /** ข้อความที่แสดงแทน text (เช่น ป้ายบอส แทนที่จะโชว์พรอมต์ยาวๆ) */
+  display?: string;
+  variant?: 'boss';
+}
+
+interface SendOptions {
+  display?: string;
+  boss?: boolean;
+  missionId?: string;
 }
 
 const WELCOME_TEXT =
   'สวัสดีครับ! ผมคือ AI Assistant ประจำโปรไฟล์ของคุณภัทษชัย สว่างกัลป์ คุณสามารถสอบถามเกี่ยวกับ ทักษะ โปรเจกต์ หรือประสบการณ์การทำงานได้เลยครับ ✨';
 
-const QUICK_COMMANDS = ['คุณภัทษชัย มีทักษะด้านไหนบ้าง?', 'เคยทำโปรเจกต์อะไรมาบ้าง?', 'ช่องทางการติดต่อคุณภัทษชัย'];
+// คำสั่งด่วน = 3 ภารกิจแรก (ก็นับเป็นการเคลียร์ภารกิจด้วย)
+const QUICK_MISSIONS = MISSIONS.slice(0, 3);
 
 /* ---------------- กล่องบทสนทนาของ AI (พิมพ์ดีดข้อความล่าสุด, แตะเพื่อข้าม) ---------------- */
 function AssistantBubble({
   id,
   text,
   typing,
+  boss,
   onDone,
 }: {
   id: string;
   text: string;
   typing: boolean;
+  boss?: boolean;
   onDone: (id: string) => void;
 }) {
   const { shown, done, skip } = useTypewriter(text, typing);
@@ -43,11 +58,11 @@ function AssistantBubble({
 
   return (
     <div
-      className="pixel-box pixel-box--cyan mt-4 max-w-[88%] px-4 py-3 text-sm leading-relaxed"
+      className={`pixel-box ${boss ? 'pixel-box--red' : 'pixel-box--cyan'} mt-4 max-w-[88%] px-4 py-3 text-sm leading-relaxed`}
       onClick={skip}
       title={done ? undefined : 'แตะเพื่อข้ามแอนิเมชัน'}
     >
-      <span className="name-tag font-pixel">AI HERO</span>
+      <span className={`name-tag font-pixel ${boss ? 'name-tag--boss' : ''}`}>{boss ? 'FINAL BOSS' : 'AI HERO'}</span>
       <div
         className={`space-y-2 [&_strong]:font-bold [&_strong]:text-white [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:mt-1 ${
           done ? '' : 'type-cursor'
@@ -61,13 +76,18 @@ function AssistantBubble({
 
 export default function Chat() {
   const { unlock } = useGameFx();
+  const { quota, refresh: refreshQuota } = useQuota(API_BASE_URL);
   const [messages, setMessages] = useState<Message[]>([{ id: 'welcome', sender: 'assistant', text: WELCOME_TEXT }]);
   const [typingId, setTypingId] = useState<string | null>('welcome');
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [sessionId, setSessionId] = useState('');
+  const [cleared, setCleared] = useState<string[]>(loadCleared);
+  const [showMissions, setShowMissions] = useState(false);
+  const [bossIntro, setBossIntro] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const replyCount = useRef(0);
+  const bossTimer = useRef(0);
 
   useEffect(() => {
     let currentSession: string | null = null;
@@ -87,6 +107,8 @@ export default function Chat() {
     setSessionId(currentSession);
   }, []);
 
+  useEffect(() => () => window.clearTimeout(bossTimer.current), []);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
@@ -103,13 +125,23 @@ export default function Chat() {
   }, []);
 
   // เพิ่มข้อความของ AI และสั่งให้พิมพ์ดีด
-  const pushAssistant = (text: string) => {
+  const pushAssistant = (text: string, variant?: 'boss') => {
     const id = (Date.now() + 1).toString();
-    setMessages((prev) => [...prev, { id, sender: 'assistant', text }]);
+    setMessages((prev) => [...prev, { id, sender: 'assistant', text, variant }]);
     setTypingId(id);
   };
 
-  const handleSend = async (customMessage?: string) => {
+  const markCleared = (missionId: string) => {
+    if (cleared.includes(missionId)) return;
+    const next = [...cleared, missionId];
+    setCleared(next);
+    saveCleared(next);
+    if (next.length >= MISSIONS.length) {
+      unlock('mission-master', 'MISSION MASTER', 'เคลียร์ภารกิจครบทุกข้อ');
+    }
+  };
+
+  const handleSend = async (customMessage?: string, opts?: SendOptions) => {
     const textToSend = customMessage || input;
     if (!textToSend.trim() || loading) return;
 
@@ -117,6 +149,7 @@ export default function Chat() {
       id: Date.now().toString(),
       sender: 'user',
       text: textToSend,
+      display: opts?.display,
     };
 
     sfx.confirm();
@@ -149,10 +182,12 @@ export default function Chat() {
       }
 
       if (res.ok && data.reply) {
-        pushAssistant(data.reply);
+        pushAssistant(data.reply, opts?.boss ? 'boss' : undefined);
         replyCount.current += 1;
         unlock('first-contact', 'FIRST CONTACT', 'ได้รับคำตอบแรกจาก AI');
         if (replyCount.current >= 3) unlock('chatterbox', 'CHATTERBOX', 'คุยกับ AI ครบ 3 ครั้ง');
+        if (opts?.missionId) markCleared(opts.missionId);
+        if (opts?.boss) unlock('boss-defeated', 'BOSS DEFEATED', 'ผ่านด่านสุดท้ายแล้ว');
       } else {
         throw new Error(`HTTP ${res.status}: ${data.error || 'เกิดข้อผิดพลาดจากเซิร์ฟเวอร์'}`);
       }
@@ -175,7 +210,27 @@ export default function Chat() {
     } finally {
       clearTimeout(timeoutId);
       setLoading(false);
+      void refreshQuota();
     }
+  };
+
+  const handleMission = (missionId: string, question: string) => {
+    sfx.select();
+    setShowMissions(false);
+    void handleSend(question, { missionId });
+  };
+
+  // บอสด่านสุดท้าย: เล่นฉากเตือนภัยก่อน แล้วค่อยส่งพรอมต์ให้ AI ประกาศเปิดตัวทีม
+  const handleBoss = () => {
+    if (loading || bossIntro) return;
+    sfx.warning();
+    setShowMissions(false);
+    setBossIntro(true);
+    window.clearTimeout(bossTimer.current);
+    bossTimer.current = window.setTimeout(() => {
+      setBossIntro(false);
+      void handleSend(BOSS_PROMPT, { display: BOSS_LABEL, boss: true });
+    }, 1700);
   };
 
   const handleNewChat = () => {
@@ -200,7 +255,8 @@ export default function Chat() {
   };
 
   const mood: HeroMood = loading ? 'think' : typingId ? 'talk' : 'idle';
-  const statusLabel = loading ? 'THINKING...' : typingId ? 'TALKING...' : 'READY';
+  const statusLabel = bossIntro ? 'WARNING!' : loading ? 'THINKING...' : typingId ? 'TALKING...' : 'READY';
+  const busy = loading || bossIntro;
 
   return (
     <div className="h-dvh flex flex-col">
@@ -231,9 +287,12 @@ export default function Chat() {
             <div className="hidden md:block pt-2">
               <PixelHero size={7} mood={mood} />
             </div>
-            <div className="text-left md:text-center">
-              <p className="font-pixel text-[9px] text-hero-gold">{statusLabel}</p>
-              <p className="text-[11px] text-slate-300 mt-1">แตะกล่องข้อความเพื่อข้ามแอนิเมชันพิมพ์</p>
+            <div className="flex-1 md:flex-none w-full text-left md:text-center space-y-3">
+              <div>
+                <p className="font-pixel text-[9px] text-hero-gold">{statusLabel}</p>
+                <p className="text-[11px] text-slate-300 mt-1">แตะกล่องข้อความเพื่อข้ามแอนิเมชันพิมพ์</p>
+              </div>
+              <EnergyBar quota={quota} />
             </div>
           </div>
         </aside>
@@ -245,10 +304,17 @@ export default function Chat() {
               msg.sender === 'user' ? (
                 <div key={msg.id} className="pixel-box pixel-box--gold mt-4 ml-auto max-w-[88%] px-4 py-3 text-sm leading-relaxed">
                   <span className="name-tag name-tag--user font-pixel">YOU</span>
-                  <p className="whitespace-pre-wrap break-words">{msg.text}</p>
+                  <p className="whitespace-pre-wrap break-words">{msg.display ?? msg.text}</p>
                 </div>
               ) : (
-                <AssistantBubble key={msg.id} id={msg.id} text={msg.text} typing={typingId === msg.id} onDone={handleTypingDone} />
+                <AssistantBubble
+                  key={msg.id}
+                  id={msg.id}
+                  text={msg.text}
+                  typing={typingId === msg.id}
+                  boss={msg.variant === 'boss'}
+                  onDone={handleTypingDone}
+                />
               ),
             )}
 
@@ -265,30 +331,74 @@ export default function Chat() {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* คำสั่งด่วน */}
+          {/* เลือกภารกิจ */}
+          {showMissions && (
+            <div className="pixel-box pixel-box--gold mt-5 mb-1 p-3 max-h-[36vh] overflow-y-auto pixel-scroll">
+              <span className="name-tag font-pixel">MISSION SELECT</span>
+              <p className="font-pixel text-[9px] text-hero-gold mt-1 mb-2">
+                CLEARED {cleared.length}/{MISSIONS.length}
+              </p>
+              <div className="grid sm:grid-cols-2 gap-1">
+                {MISSIONS.map((m) => {
+                  const done = cleared.includes(m.id);
+                  return (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => handleMission(m.id, m.question)}
+                      disabled={busy}
+                      className="pixel-btn pixel-btn--sm flex-col items-start justify-start text-left gap-1"
+                    >
+                      <span className="font-pixel text-[8px] text-hero-cyan">
+                        {'★'.repeat(m.stars)} {m.tag} {done && <span className="text-emerald-300">✔ CLEARED</span>}
+                      </span>
+                      <span className="text-xs leading-snug">{m.question}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* คำสั่งด่วน + เมนูภารกิจ + บอส */}
           <div className="flex flex-wrap items-center gap-1 py-2">
             <span className="font-pixel text-[9px] text-hero-cyan mr-1">COMMANDS ▶</span>
-            {QUICK_COMMANDS.map((q) => (
+            {QUICK_MISSIONS.map((m) => (
               <button
-                key={q}
+                key={m.id}
                 type="button"
-                onClick={() => {
-                  sfx.select();
-                  handleSend(q);
-                }}
-                disabled={loading}
+                onClick={() => handleMission(m.id, m.question)}
+                disabled={busy}
                 className="pixel-btn pixel-btn--sm"
               >
-                {q}
+                {m.question}
               </button>
             ))}
+            <button
+              type="button"
+              onClick={() => {
+                sfx.select();
+                setShowMissions((v) => !v);
+              }}
+              className="pixel-btn pixel-btn--gold pixel-btn--sm font-pixel text-[9px]"
+            >
+              MISSIONS {cleared.length}/{MISSIONS.length} {showMissions ? '▲' : '▼'}
+            </button>
+            <button
+              type="button"
+              onClick={handleBoss}
+              disabled={busy}
+              className="pixel-btn pixel-btn--sm font-pixel text-[9px] !text-white !bg-red-700 !border-red-300"
+            >
+              ☠ FINAL BOSS
+            </button>
           </div>
 
           {/* ช่องพิมพ์ */}
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              handleSend();
+              void handleSend();
             }}
             className="flex items-stretch gap-3 pb-1"
           >
@@ -301,13 +411,13 @@ export default function Chat() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="พิมพ์คำถามเกี่ยวกับโปรไฟล์ที่นี่..."
-                disabled={loading}
+                disabled={busy}
                 className="flex-1 min-w-0 bg-transparent py-3 text-sm text-slate-100 placeholder-slate-500 outline-none"
               />
             </div>
             <button
               type="submit"
-              disabled={loading || !input.trim()}
+              disabled={busy || !input.trim()}
               className="pixel-btn pixel-btn--gold font-pixel text-[10px] shrink-0"
             >
               SEND ▶
@@ -315,6 +425,20 @@ export default function Chat() {
           </form>
         </section>
       </main>
+
+      {/* ฉากเตือนภัยก่อนบอสด่านสุดท้าย */}
+      {bossIntro && (
+        <div className="boss-overlay" aria-hidden="true">
+          <div className="text-center">
+            <div className="boss-text font-pixel shake">
+              ⚠ WARNING ⚠
+              <br />
+              FINAL BOSS
+            </div>
+            <p className="mt-6 text-lg font-bold text-white">ด่านสุดท้ายมาแล้ว!</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
