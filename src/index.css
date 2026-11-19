@@ -592,3 +592,112 @@ body {
     transform: translate(0, 0);
   }
 }
+
+@layer components {
+  /* แถบค่าพลังตัวละคร */
+  .stat-bar {
+    display: flex;
+    gap: 2px;
+  }
+  .stat-bar i {
+    flex: 1;
+    height: 8px;
+    background: #1a2350;
+    border: 1px solid #3a4a8c;
+  }
+  .stat-bar i.on {
+    background: #ffd23f;
+    border-color: #ffd23f;
+  }
+
+  /* ของประกอบฉากประจำตัวละคร */
+  .companion {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .companion-drone {
+    inset: auto;
+    top: -18px;
+    right: -34px;
+    animation: drone-hover 1.6s steps(6) infinite;
+  }
+  .orb,
+  .spark {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    top: 50%;
+    left: 50%;
+  }
+  .orb {
+    background: #4fe3ff;
+    box-shadow: 0 0 0 2px #0b1020, 0 0 10px #4fe3ff;
+    animation: orbit 3.2s steps(16) infinite;
+  }
+  .orb-b {
+    background: #ff4d8d;
+    box-shadow: 0 0 0 2px #0b1020, 0 0 10px #ff4d8d;
+    animation-delay: -1.07s;
+  }
+  .orb-c {
+    background: #ffd23f;
+    box-shadow: 0 0 0 2px #0b1020, 0 0 10px #ffd23f;
+    animation-delay: -2.13s;
+  }
+  .spark {
+    background: #ffffff;
+    box-shadow: 0 0 0 2px #27c4e8;
+    opacity: 0;
+    animation: spark-pop 2.4s steps(4) infinite;
+  }
+  .spark-a {
+    top: 12%;
+    left: 4%;
+  }
+  .spark-b {
+    top: 30%;
+    left: 92%;
+    animation-delay: -0.8s;
+  }
+  .spark-c {
+    top: 78%;
+    left: 8%;
+    animation-delay: -1.6s;
+  }
+}
+@keyframes orbit {
+  from {
+    transform: rotate(0deg) translateX(92px) rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg) translateX(92px) rotate(-360deg);
+  }
+}
+@keyframes drone-hover {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-10px, -8px);
+  }
+  50% {
+    transform: translate(0, -14px);
+  }
+  75% {
+    transform: translate(8px, -6px);
+  }
+}
+@keyframes spark-pop {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  40%,
+  60% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

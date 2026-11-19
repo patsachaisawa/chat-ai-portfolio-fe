@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import PixelArt from './PixelArt';
-import { buildHeroRows, HERO_PALETTES } from '../lib/sprites';
+import { buildHeroRows, HERO_SPRITES } from '../lib/sprites';
 
 export type HeroMood = 'idle' | 'think' | 'talk';
 
 interface PixelHeroProps {
   mood?: HeroMood;
-  /** 1 = ชุดฟ้า-ส้ม, 2 = ชุดชมพู-ฟ้า */
-  variant?: 1 | 2;
+  /** 1 = อัศวินโค้ด (ฟ้า-ส้ม), 2 = นักวิเคราะห์ข้อมูล (เขียว-แว่น), 3 = นักบินโดรน (แดง) */
+  variant?: 1 | 2 | 3;
   size?: number;
   bob?: boolean;
   className?: string;
@@ -45,12 +45,12 @@ export default function PixelHero({ mood = 'idle', variant = 1, size = 8, bob = 
     };
   }, [mood]);
 
-  const rows = useMemo(() => buildHeroRows(blink, mouthOpen), [blink, mouthOpen]);
+  const rows = useMemo(() => buildHeroRows(variant, blink, mouthOpen), [variant, blink, mouthOpen]);
 
   return (
     <span className={`relative inline-block ${bob ? 'hero-bob' : ''} ${className}`}>
       {mood === 'think' && <span className="think-bubble font-pixel">?</span>}
-      <PixelArt rows={rows} palette={HERO_PALETTES[variant]} size={size} title="ฮีโร่พิกเซล" />
+      <PixelArt rows={rows} palette={HERO_SPRITES[variant].palette} size={size} title="ฮีโร่พิกเซล" />
     </span>
   );
 }

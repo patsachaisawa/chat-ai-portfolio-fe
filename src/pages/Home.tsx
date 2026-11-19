@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { Brain, Code2, Database, FolderGit2, Mail } from 'lucide-react';
 import PixelArt from '../components/PixelArt';
 import PixelHero from '../components/PixelHero';
-import { ROBOT_PALETTE, ROBOT_ROWS } from '../lib/sprites';
+import { DRONE_PALETTE, DRONE_ROWS, ROBOT_PALETTE, ROBOT_ROWS } from '../lib/sprites';
 import { useGameFx } from '../lib/gameFx';
 import { useInView } from '../lib/useInView';
 import { useTypewriter } from '../lib/useTypewriter';
@@ -28,6 +28,13 @@ interface Member {
   id: string;
   name: string;
   role: string;
+  /** ตัวละครในเกม: 1 อัศวินโค้ด, 2 นักวิเคราะห์ข้อมูล, 3 นักบินโดรน */
+  hero: 1 | 2 | 3;
+  heroClass: string;
+  special: string;
+  /** ค่าพลังแบบเกม (เต็ม 5) เป็นแค่ลูกเล่น แก้ตัวเลขได้ตามต้องการ */
+  stats: { label: string; value: number }[];
+  tips: string[];
   skills: SkillGroup[];
   projects: Project[];
 }
@@ -37,6 +44,11 @@ const teamMembers: Member[] = [
     id: 'patsachai',
     name: 'ภัทษชัย สว่างกัลป์',
     role: 'AI & Data Science Student / Full-Stack Developer',
+    hero: 1,
+    heroClass: 'CODE KNIGHT',
+    special: 'DIAMOND SLASH',
+    stats: [{ label: 'AI', value: 4 }, { label: 'CODE', value: 5 }, { label: 'UI', value: 3 }, { label: 'OPS', value: 4 }],
+    tips: ['แตะฉันสิ!', 'ลองคุยกับ AI ดูนะ', 'ฉันเขียนโค้ดได้ทั้งหน้าบ้านหลังบ้าน'],
     skills: [
       {
         title: 'AI & Data Science',
@@ -80,6 +92,11 @@ const teamMembers: Member[] = [
     id: 'panat',
     name: 'ปาณัสม์ เบญจวรรณ (พีซ)',
     role: 'AI & Data Science Student / Data Engineer',
+    hero: 2,
+    heroClass: 'DATA SAGE',
+    special: 'PIPELINE FLOW',
+    stats: [{ label: 'AI', value: 5 }, { label: 'CODE', value: 3 }, { label: 'UI', value: 2 }, { label: 'OPS', value: 4 }],
+    tips: ['ข้อมูลทุกก้อนมีความหมาย', 'ท่อข้อมูลของฉันไหลอัตโนมัติ', 'แตะฉันสิ!'],
     skills: [
       {
         title: 'AI & Data Science',
@@ -105,6 +122,11 @@ const teamMembers: Member[] = [
     id: 'kanthawit',
     name: 'กันต์ธนวิท ทองกร (กัน)',
     role: 'Frontend Developer / UI & Data Science Student',
+    hero: 3,
+    heroClass: 'DRONE PILOT',
+    special: 'SKY SCAN',
+    stats: [{ label: 'AI', value: 3 }, { label: 'CODE', value: 4 }, { label: 'UI', value: 5 }, { label: 'OPS', value: 3 }],
+    tips: ['พร้อมขึ้นบินแล้ว!', 'โดรนของฉันบันทึกภารกิจทุกเที่ยว', 'แตะฉันสิ!'],
     skills: [
       {
         title: 'Frontend & UI/UX',
@@ -141,7 +163,6 @@ const teamMembers: Member[] = [
 const START_KEY = 'pixel_started';
 const WELCOME_TEXT =
   'ยินดีต้อนรับสู่พื้นที่รวบรวมทักษะและผลงานเด่น สามารถเลือกดูโปรไฟล์ของสมาชิกในทีม หรือทดลองพิมพ์สอบถามข้อมูลด้วย AI Assistant ได้ทันที';
-const STAGE_TIPS = ['แตะฉันสิ!', 'ลองคุยกับ AI ดูนะ', 'มีรหัสลับซ่อนอยู่...', 'เลื่อนลงไปดูภารกิจ!'];
 const SKILL_ACCENTS = ['pixel-box--cyan', 'pixel-box--gold', 'pixel-box--pink'];
 
 function readStarted(): boolean {
@@ -152,9 +173,6 @@ function readStarted(): boolean {
   }
 }
 
-function variantOf(index: number): 1 | 2 {
-  return index % 2 === 0 ? 1 : 2;
-}
 
 /* ---------------- หน้าจอ Title: กด Start เพื่อเข้าเกม ---------------- */
 function TitleScreen({ onStart }: { onStart: () => void }) {
@@ -203,17 +221,49 @@ function IntroDialog({ text }: { text: string }) {
   );
 }
 
+/* ---------------- ของประกอบฉากประจำตัวละคร ---------------- */
+function Companion({ hero }: { hero: 1 | 2 | 3 }) {
+  if (hero === 3) {
+    return (
+      <span className="companion companion-drone" aria-hidden="true">
+        <PixelArt rows={DRONE_ROWS} palette={DRONE_PALETTE} size={4} />
+      </span>
+    );
+  }
+  if (hero === 2) {
+    return (
+      <span className="companion" aria-hidden="true">
+        <i className="orb orb-a" />
+        <i className="orb orb-b" />
+        <i className="orb orb-c" />
+      </span>
+    );
+  }
+  return (
+    <span className="companion" aria-hidden="true">
+      <i className="spark spark-a" />
+      <i className="spark spark-b" />
+      <i className="spark spark-c" />
+    </span>
+  );
+}
+
 /* ---------------- เวทีฮีโร่: แตะเล่นได้ ---------------- */
-function HeroStage({ variant }: { variant: 1 | 2 }) {
+function HeroStage({ member }: { member: Member }) {
   const { triggerPowerUp, unlock } = useGameFx();
   const [tip, setTip] = useState(0);
   const [taps, setTaps] = useState(0);
   const [jump, setJump] = useState(false);
 
   useEffect(() => {
-    const id = window.setInterval(() => setTip((t) => (t + 1) % STAGE_TIPS.length), 3500);
+    setTip(0);
+    setTaps(0);
+  }, [member.id]);
+
+  useEffect(() => {
+    const id = window.setInterval(() => setTip((t) => (t + 1) % member.tips.length), 3500);
     return () => window.clearInterval(id);
-  }, []);
+  }, [member.tips.length]);
 
   useEffect(() => {
     if (!jump) return;
@@ -228,7 +278,7 @@ function HeroStage({ variant }: { variant: 1 | 2 }) {
     if (next >= 5) {
       setTaps(0);
       triggerPowerUp();
-      unlock('tap-hero', 'POWER AWAKENED', 'แตะฮีโร่ครบ 5 ครั้ง');
+      unlock('tap-hero', 'POWER AWAKENED', `ปล่อยท่าไม้ตาย ${member.special}!`);
     } else {
       setTaps(next);
     }
@@ -236,18 +286,38 @@ function HeroStage({ variant }: { variant: 1 | 2 }) {
 
   return (
     <div className="pixel-box pixel-box--cyan p-5 flex flex-col items-center gap-4">
-      <span className="name-tag font-pixel">STAGE</span>
-      <div className="speech mt-2">{STAGE_TIPS[tip]}</div>
-      <button
-        type="button"
-        onClick={onTap}
-        aria-label="แตะฮีโร่"
-        className={`cursor-pointer ${jump ? 'hero-jump' : ''}`}
-      >
-        <PixelHero size={9} variant={variant} />
-      </button>
+      <span className="name-tag font-pixel">{member.heroClass}</span>
+      <div className="speech mt-2">{member.tips[tip % member.tips.length]}</div>
+      <div className="relative">
+        <Companion hero={member.hero} />
+        <button
+          type="button"
+          onClick={onTap}
+          aria-label="แตะฮีโร่"
+          className={`cursor-pointer ${jump ? 'hero-jump' : ''}`}
+        >
+          <PixelHero size={9} variant={member.hero} />
+        </button>
+      </div>
       <div className="stage-floor w-full" />
-      <p className="font-pixel text-[9px] text-hero-gold">TAP {taps}/5</p>
+      <div className="w-full grid grid-cols-2 gap-x-4 gap-y-2">
+        {member.stats.map((st) => (
+          <div key={st.label}>
+            <div className="flex justify-between font-pixel text-[8px] text-slate-300 mb-1">
+              <span>{st.label}</span>
+              <span className="text-hero-gold">{st.value}/5</span>
+            </div>
+            <div className="stat-bar" aria-hidden="true">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <i key={n} className={n <= st.value ? 'on' : ''} />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+      <p className="font-pixel text-[9px] text-hero-gold">
+        SPECIAL: {member.special} · TAP {taps}/5
+      </p>
     </div>
   );
 }
@@ -362,7 +432,7 @@ function MainHome() {
             </a>
           </div>
         </div>
-        <HeroStage variant={variantOf(memberIndex)} />
+        <HeroStage member={currentMember} />
       </section>
 
       {/* Character select */}
@@ -381,8 +451,9 @@ function MainHome() {
                   className={`pixel-box select-card ${active ? 'is-active' : ''}`}
                 >
                   <span className="font-pixel text-[9px] text-hero-cyan">PLAYER {idx + 1}</span>
-                  <PixelHero size={4} variant={variantOf(idx)} bob={active} />
+                  <PixelHero size={4} variant={member.hero} bob={active} />
                   <span className="font-bold text-sm text-white">{member.name}</span>
+                  <span className="font-pixel text-[8px] text-hero-gold">{member.heroClass}</span>
                   {active && <span className="font-pixel text-[9px] text-hero-gold blink-soft">▶ READY!</span>}
                 </button>
               );
