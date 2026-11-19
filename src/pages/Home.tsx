@@ -205,11 +205,7 @@ function TitleScreen({ onStart }: { onStart: () => void }) {
     <section className="min-h-dvh flex flex-col items-center justify-center text-center px-6 py-10 gap-8">
       <div className="space-y-4">
         <p className="font-pixel text-[10px] md:text-xs text-hero-cyan tracking-widest">★ A PIXEL HERO ADVENTURE ★</p>
-        <h1 className="pixel-title font-pixel text-2xl sm:text-4xl md:text-6xl leading-tight">
-          AI
-          <br />
-          INNOVATORS
-        </h1>
+        <h1 className="pixel-title !font-game font-bold text-5xl sm:text-7xl md:text-8xl leading-tight">ยังไม่ได้นอน</h1>
         <p className="font-pixel text-[10px] md:text-sm text-hero-gold">PIXEL HERO QUEST</p>
       </div>
 
@@ -219,7 +215,7 @@ function TitleScreen({ onStart }: { onStart: () => void }) {
         PRESS START
       </button>
       <p className="text-xs text-slate-300">กด Enter / Space หรือแตะปุ่มเพื่อเริ่มเกม</p>
-      <p className="font-pixel text-[8px] text-slate-400">© 2026 AI INNOVATORS TEAM</p>
+      <p className="text-xs font-bold text-slate-400">© 2026 ทีมยังไม่ได้นอน</p>
     </section>
   );
 }
@@ -412,7 +408,7 @@ function MainHome() {
         <div className="max-w-6xl mx-auto px-4 md:px-6 py-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <PixelArt rows={ROBOT_ROWS} palette={ROBOT_PALETTE} size={3} />
-            <span className="font-pixel text-[10px] md:text-xs text-hero-gold">AI INNOVATORS</span>
+            <span className="text-base md:text-lg font-bold text-hero-gold">ยังไม่ได้นอน</span>
           </div>
           <div className="flex items-center gap-2 md:gap-4">
             <a href="#skills" className="hidden sm:inline font-pixel text-[9px] text-slate-200 hover:text-hero-gold">
@@ -528,7 +524,7 @@ function MainHome() {
       {/* Footer */}
       <footer className="pixel-bar border-b-0 border-t-4 py-8">
         <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-center">
-          <p className="font-pixel text-[8px] text-slate-300 leading-relaxed">© 2026 AI INNOVATORS TEAM. ALL RIGHTS RESERVED.</p>
+          <p className="text-xs font-bold text-slate-300 leading-relaxed">© 2026 ทีมยังไม่ได้นอน · ALL RIGHTS RESERVED</p>
           <a
             href="mailto:Patsachai.sawa@bumail.net"
             className="flex items-center gap-2 font-pixel text-[9px] text-hero-cyan hover:text-hero-gold"
