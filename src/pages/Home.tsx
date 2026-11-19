@@ -77,32 +77,62 @@ const teamMembers: Member[] = [
     ],
   },
   {
-    id: 'member2',
-    name: 'ชื่อสมาชิกคนที่ 2',
-    role: 'Frontend Developer / UI Specialist',
+    id: 'panat',
+    name: 'ปาณัสม์ เบญจวรรณ (พีซ)',
+    role: 'AI & Data Science Student / Data Engineer',
     skills: [
       {
-        title: 'UI/UX & Design',
-        icon: 'code',
-        items: 'Figma, Responsive Design, Tailwind CSS, Component Library Design',
+        title: 'AI & Data Science',
+        icon: 'brain',
+        items: 'Core Data & Stats, Machine Learning, LLM Application Integration, Prompt Engineering',
       },
       {
-        title: 'Frontend Frameworks',
-        icon: 'code',
-        items: 'React, Next.js, TypeScript, State Management (Zustand/Redux)',
-      },
-      {
-        title: 'Web Optimization',
+        title: 'Databases & DevOps',
         icon: 'database',
-        items: 'Web Vitals, SEO Optimization, Cross-browser Testing',
+        items: 'Python, PostgreSQL, Supabase, Docker, Git / GitHub',
       },
     ],
     projects: [
       {
-        title: 'Shared Team Portfolio App',
-        category: 'TEAM PROJECT',
-        tagColor: 'text-amber-400',
-        desc: 'ออกแบบและพัฒนา UI Component Library สำหรับเว็บไซต์พอร์ตโฟลิโอร่วมของทีม',
+        title: 'Big Data Processing and Analytics',
+        category: 'DATA ENGINEERING',
+        tagColor: 'text-purple-400',
+        desc: 'สร้าง Automated Data Pipeline และแดชบอร์ดวิเคราะห์ข้อมูลเชิงตอบโต้',
+      },
+    ],
+  },
+  {
+    id: 'kanthawit',
+    name: 'กันต์ธนวิท ทองกร (กัน)',
+    role: 'Frontend Developer / UI & Data Science Student',
+    skills: [
+      {
+        title: 'Frontend & UI/UX',
+        icon: 'code',
+        items: 'React, JavaScript / TypeScript, HTML / CSS, Tailwind CSS, Figma, Responsive Design',
+      },
+      {
+        title: 'AI & Data Science',
+        icon: 'brain',
+        items: 'Core Data & Stats, Machine Learning, LLM Application Integration',
+      },
+      {
+        title: 'Databases & DevOps',
+        icon: 'database',
+        items: 'Python, PostgreSQL, Supabase, Docker, Git / GitHub',
+      },
+      {
+        title: 'Programming & 3D',
+        icon: 'code',
+        items: 'Lua, Blender',
+      },
+    ],
+    projects: [
+      {
+        title: 'Drone Mission Data Analytics',
+        category: 'DATA ANALYTICS',
+        tagColor: 'text-emerald-400',
+        desc: 'ระบบเก็บและวิเคราะห์ข้อมูลภารกิจบินโดรน เช่น เส้นทางบิน พิกัด GPS ความสูง แบตเตอรี่ และภาพถ่ายทางอากาศ พร้อมแดชบอร์ดแสดงผลข้อมูลภารกิจ',
       },
     ],
   },
