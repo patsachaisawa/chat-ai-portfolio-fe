@@ -417,7 +417,7 @@ function MainHome() {
             <a href="#quests" className="hidden sm:inline font-pixel text-[9px] text-slate-200 hover:text-hero-gold">
               QUESTS
             </a>
-            <Link to="/chat" onClick={() => sfx.confirm()} className="pixel-btn pixel-btn--gold pixel-btn--sm font-pixel text-[10px]">
+            <Link to={`/chat?hero=${currentMember.hero}`} onClick={() => sfx.confirm()} className="pixel-btn pixel-btn--gold pixel-btn--sm font-pixel text-[10px]">
               TALK TO AI ▶
             </Link>
           </div>
@@ -434,7 +434,7 @@ function MainHome() {
           <p className="font-pixel text-[10px] md:text-xs text-hero-cyan leading-relaxed">CLASS ▶ {currentMember.role}</p>
           <IntroDialog key={currentMember.id} text={WELCOME_TEXT} />
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 pt-2">
-            <Link to="/chat" onClick={() => sfx.confirm()} className="pixel-btn pixel-btn--gold font-pixel text-[11px]">
+            <Link to={`/chat?hero=${currentMember.hero}`} onClick={() => sfx.confirm()} className="pixel-btn pixel-btn--gold font-pixel text-[11px]">
               ▶ สอบถามโปรไฟล์ด้วย AI
             </Link>
             <a href="#quests" onClick={() => sfx.select()} className="pixel-btn font-pixel text-[11px]">
@@ -504,7 +504,7 @@ function MainHome() {
               </div>
               {project.link ? (
                 <Link
-                  to={project.link}
+                  to={`${project.link}?hero=${currentMember.hero}`}
                   onClick={() => sfx.confirm()}
                   className="pixel-btn pixel-btn--gold pixel-btn--sm font-pixel text-[10px] w-fit"
                 >
