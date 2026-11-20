@@ -34,8 +34,22 @@ function chunk(text: string, max = 160): string[] {
   return out;
 }
 
+// ให้คะแนนเสียงไทย: เสียงแบบ Neural/Natural/Online (เช่นของ Edge, Google) ฟังเป็นธรรมชาติกว่าเสียงในเครื่องรุ่นเก่า
+function voiceScore(v: SpeechSynthesisVoice): number {
+  const name = v.name.toLowerCase();
+  let score = 0;
+  if (/natural|neural|online|premium|enhanced/.test(name)) score += 10;
+  if (/google/.test(name)) score += 6;
+  if (/premwadee|niwat|kanya|narisa/.test(name)) score += 3;
+  if (!v.localService) score += 2;
+  return score;
+}
+
 function thaiVoice(): SpeechSynthesisVoice | undefined {
-  return window.speechSynthesis.getVoices().find((v) => v.lang.toLowerCase().replace('_', '-').startsWith('th'));
+  return window.speechSynthesis
+    .getVoices()
+    .filter((v) => v.lang.toLowerCase().replace('_', '-').startsWith('th'))
+    .sort((a, b) => voiceScore(b) - voiceScore(a))[0];
 }
 
 export type ThaiVoiceState = 'unknown' | 'yes' | 'no';
@@ -73,7 +87,8 @@ export function speak(markdown: string, onEnd: () => void): void {
     const u = new SpeechSynthesisUtterance(part);
     u.lang = 'th-TH';
     if (voice) u.voice = voice;
-    u.rate = 1;
+    u.rate = 0.95; // ช้าลงนิดหน่อยให้ฟังเป็นจังหวะคนพูด
+    u.pitch = 1;
     if (i === parts.length - 1) u.onend = onEnd;
     u.onerror = onEnd;
     synth.speak(u);
