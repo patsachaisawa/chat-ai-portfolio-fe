@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { Brain, Code2, Database, FolderGit2, Mail } from 'lucide-react';
 import PixelArt from '../components/PixelArt';
+import IntroStory from '../components/IntroStory';
 import PixelHero from '../components/PixelHero';
 import { DRONE_PALETTE, DRONE_ROWS, ROBOT_PALETTE, ROBOT_ROWS } from '../lib/sprites';
 import { useGameFx } from '../lib/gameFx';
@@ -542,6 +543,7 @@ function MainHome() {
 export default function Home() {
   const { unlock } = useGameFx();
   const [started, setStarted] = useState(readStarted);
+  const [story, setStory] = useState(false);
 
   const handleStart = useCallback(() => {
     sfx.confirm();
@@ -552,8 +554,15 @@ export default function Home() {
     }
     unlock('press-start', 'GAME START', 'เริ่มต้นการผจญภัย');
     setStarted(true);
+    setStory(true);
     window.scrollTo(0, 0);
   }, [unlock]);
 
-  return started ? <MainHome /> : <TitleScreen onStart={handleStart} />;
+  const finishStory = useCallback(() => {
+    setStory(false);
+    window.scrollTo(0, 0);
+  }, []);
+
+  if (!started) return <TitleScreen onStart={handleStart} />;
+  return story ? <IntroStory onFinish={finishStory} /> : <MainHome />;
 }
