@@ -3,6 +3,7 @@ import type { MouseEvent } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Link, useSearchParams } from 'react-router-dom';
 import EnergyBar from '../components/EnergyBar';
+import GameClear from '../components/GameClear';
 import PixelHero from '../components/PixelHero';
 import type { HeroMood } from '../components/PixelHero';
 import { useGameFx } from '../lib/gameFx';
@@ -132,6 +133,7 @@ export default function Chat() {
   const [cleared, setCleared] = useState<string[]>(loadCleared);
   const [showMissions, setShowMissions] = useState(false);
   const [bossIntro, setBossIntro] = useState(false);
+  const [showEnding, setShowEnding] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const replyCount = useRef(0);
   const bossTimer = useRef(0);
@@ -185,6 +187,8 @@ export default function Chat() {
     saveCleared(next);
     if (next.length >= MISSIONS.length) {
       unlock('mission-master', 'MISSION MASTER', 'เคลียร์ภารกิจครบทุกข้อ');
+      // รอให้คำตอบสุดท้ายแสดงสักพักก่อนขึ้นหน้าจบเกม
+      window.setTimeout(() => setShowEnding(true), 4000);
     }
   };
 
@@ -385,6 +389,15 @@ export default function Chat() {
               <p className="font-pixel text-[9px] text-hero-gold mt-1 mb-2">
                 CLEARED {cleared.length}/{MISSIONS.length}
               </p>
+              {cleared.length >= MISSIONS.length && (
+                <button
+                  type="button"
+                  onClick={() => setShowEnding(true)}
+                  className="pixel-btn pixel-btn--gold pixel-btn--sm font-pixel text-[9px] mb-2"
+                >
+                  🏆 ดูหน้าจบเกม
+                </button>
+              )}
               <div className="grid sm:grid-cols-2 gap-1">
                 {MISSIONS.map((m) => {
                   const done = cleared.includes(m.id);
@@ -472,6 +485,8 @@ export default function Chat() {
           </form>
         </section>
       </main>
+
+      {showEnding && <GameClear onClose={() => setShowEnding(false)} />}
 
       {/* ฉากเตือนภัยก่อนบอสด่านสุดท้าย */}
       {bossIntro && (
