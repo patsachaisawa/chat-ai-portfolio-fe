@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type { MouseEvent } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Link, useSearchParams } from 'react-router-dom';
 import EnergyBar from '../components/EnergyBar';
@@ -7,6 +8,7 @@ import type { HeroMood } from '../components/PixelHero';
 import { useGameFx } from '../lib/gameFx';
 import { BOSS_LABEL, BOSS_PROMPT, MISSIONS, missionQuestion, loadCleared, saveCleared } from '../lib/missions';
 import { sfx } from '../lib/sfx';
+import { speak, speechSupported, stopSpeaking, useThaiVoice } from '../lib/speech';
 import { useQuota } from '../lib/useQuota';
 import { useTypewriter } from '../lib/useTypewriter';
 
@@ -63,6 +65,22 @@ function AssistantBubble({
   onDone: (id: string) => void;
 }) {
   const { shown, done, skip } = useTypewriter(text, typing);
+  const [speaking, setSpeaking] = useState(false);
+  const thai = useThaiVoice();
+
+  // เลิกอ่านเมื่อกล่องข้อความนี้หายไป (เช่น กด NEW GAME)
+  useEffect(() => () => stopSpeaking(), []);
+
+  const toggleSpeak = (e: MouseEvent) => {
+    e.stopPropagation();
+    if (speaking) {
+      stopSpeaking();
+      setSpeaking(false);
+      return;
+    }
+    setSpeaking(true);
+    speak(text, () => setSpeaking(false));
+  };
 
   useEffect(() => {
     if (typing && done) onDone(id);
@@ -82,6 +100,20 @@ function AssistantBubble({
       >
         <ReactMarkdown>{shown}</ReactMarkdown>
       </div>
+      {done && speechSupported && (
+        <div className="mt-2 flex justify-end">
+          <button
+            type="button"
+            onClick={toggleSpeak}
+            disabled={thai === 'no'}
+            aria-label={speaking ? 'หยุดอ่านออกเสียง' : 'ฟังเสียงคำตอบ'}
+            title={thai === 'no' ? 'อุปกรณ์นี้ไม่มีเสียงภาษาไทย' : speaking ? 'หยุดอ่าน' : 'ฟังเสียงคำตอบ'}
+            className="pixel-btn pixel-btn--sm font-pixel text-[9px] disabled:opacity-40"
+          >
+            {speaking ? '■ หยุด' : '🔊 ฟัง'}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
