@@ -5,7 +5,7 @@ import EnergyBar from '../components/EnergyBar';
 import PixelHero from '../components/PixelHero';
 import type { HeroMood } from '../components/PixelHero';
 import { useGameFx } from '../lib/gameFx';
-import { BOSS_LABEL, BOSS_PROMPT, MISSIONS, loadCleared, saveCleared } from '../lib/missions';
+import { BOSS_LABEL, BOSS_PROMPT, MISSIONS, fillName, loadCleared, saveCleared } from '../lib/missions';
 import { sfx } from '../lib/sfx';
 import { useQuota } from '../lib/useQuota';
 import { useTypewriter } from '../lib/useTypewriter';
@@ -34,6 +34,12 @@ const ASSISTANT_NAMES: Record<1 | 2 | 3, string> = {
   1: 'คุณภัทษชัย สว่างกัลป์ (เพชร)',
   2: 'คุณปาณัสม์ เบญจวรรณ (พีซ)',
   3: 'คุณกันต์ธนวิท ทองกร (กัน)',
+};
+
+const MEMBER_LABELS: Record<1 | 2 | 3, { en: string; ask: string }> = {
+  1: { en: 'Patsachai Sawangkalp', ask: 'คุณภัทษชัย' },
+  2: { en: 'Panat Benjawan', ask: 'คุณปาณัสม์' },
+  3: { en: 'Kanthawit Thongkorn', ask: 'คุณกันต์ธนวิท' },
 };
 
 const welcomeText = (hero: 1 | 2 | 3) =>
@@ -277,7 +283,7 @@ export default function Chat() {
           </Link>
           <div className="min-w-0">
             <h1 className="font-pixel text-[10px] md:text-xs text-hero-gold truncate">AI PORTFOLIO ASSISTANT</h1>
-            <p className="text-[11px] text-slate-300 truncate">Patsachai Sawangkalp Profile Chatbot</p>
+            <p className="text-[11px] text-slate-300 truncate">{MEMBER_LABELS[hero].en} Profile Chatbot</p>
           </div>
         </div>
         <button type="button" onClick={handleNewChat} className="pixel-btn pixel-btn--sm font-pixel text-[10px] shrink-0">
@@ -354,14 +360,14 @@ export default function Chat() {
                     <button
                       key={m.id}
                       type="button"
-                      onClick={() => handleMission(m.id, m.question)}
+                      onClick={() => handleMission(m.id, fillName(m.question, MEMBER_LABELS[hero].ask))}
                       disabled={busy}
                       className="pixel-btn pixel-btn--sm flex-col items-start justify-start text-left gap-1"
                     >
                       <span className="font-pixel text-[8px] text-hero-cyan">
                         {'★'.repeat(m.stars)} {m.tag} {done && <span className="text-emerald-300">✔ CLEARED</span>}
                       </span>
-                      <span className="text-xs leading-snug">{m.question}</span>
+                      <span className="text-xs leading-snug">{fillName(m.question, MEMBER_LABELS[hero].ask)}</span>
                     </button>
                   );
                 })}
@@ -376,11 +382,11 @@ export default function Chat() {
               <button
                 key={m.id}
                 type="button"
-                onClick={() => handleMission(m.id, m.question)}
+                onClick={() => handleMission(m.id, fillName(m.question, MEMBER_LABELS[hero].ask))}
                 disabled={busy}
                 className="pixel-btn pixel-btn--sm"
               >
-                {m.question}
+                {fillName(m.question, MEMBER_LABELS[hero].ask)}
               </button>
             ))}
             <button

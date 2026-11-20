@@ -8,10 +8,13 @@ export interface Mission {
   question: string;
 }
 
+/** ใส่ชื่อสมาชิกแทน {name} ในคำถามตัวอย่าง */
+export const fillName = (question: string, name: string) => question.replace('{name}', name);
+
 export const MISSIONS: Mission[] = [
-  { id: 'skills', tag: 'SKILL', stars: 1, question: 'คุณภัทษชัย มีทักษะด้านไหนบ้าง?' },
-  { id: 'projects', tag: 'QUEST', stars: 1, question: 'เคยทำโปรเจกต์อะไรมาบ้าง?' },
-  { id: 'contact', tag: 'CONTACT', stars: 1, question: 'ช่องทางการติดต่อคุณภัทษชัย' },
+  { id: 'skills', tag: 'SKILL', stars: 1, question: '{name} มีทักษะด้านไหนบ้าง?' },
+  { id: 'projects', tag: 'QUEST', stars: 1, question: '{name} เคยทำโปรเจกต์อะไรมาบ้าง?' },
+  { id: 'contact', tag: 'CONTACT', stars: 1, question: 'ช่องทางการติดต่อ{name}' },
   { id: 'team', tag: 'TEAM', stars: 2, question: 'ทีมนี้มีสมาชิกกี่คน และแต่ละคนถนัดอะไร?' },
   { id: 'tech', tag: 'TECH', stars: 2, question: 'โปรเจกต์ AI Portfolio Chatbot ใช้เทคโนโลยีอะไรบ้าง?' },
   { id: 'hack4hope', tag: 'STORY', stars: 2, question: 'เล่าเรื่องโปรเจกต์ HACK4HOPE ให้ฟังหน่อย' },
