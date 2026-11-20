@@ -6,84 +6,119 @@ import { ROBOT_PALETTE, ROBOT_ROWS } from '../lib/sprites';
 import { sfx } from '../lib/sfx';
 import { useTypewriter } from '../lib/useTypewriter';
 
-interface Panel {
+/** วางฮีโร่ 3 ตัว; focus = ตัวที่ถูกเน้น (ตัวอื่นหรี่ลง), delayed = ให้เดินเข้าฉากทีละตัว */
+function Heroes({ focus, enter }: { focus?: 1 | 2 | 3; enter?: boolean }) {
+  return (
+    <div className="flex items-end justify-center gap-4 md:gap-10">
+      {([1, 2, 3] as const).map((v, i) => (
+        <span
+          key={v}
+          className={`inline-block transition-all duration-500 ${enter ? 'story-rise' : ''} ${
+            focus && focus !== v ? 'opacity-30 grayscale' : focus === v ? 'scale-110' : ''
+          }`}
+          style={enter ? { animationDelay: `${i * 0.6}s` } : undefined}
+        >
+          <PixelHero variant={v} size={7} />
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function Robot({ awake }: { awake?: boolean }) {
+  return (
+    <span className={`inline-block ${awake ? 'hero-bob' : 'robot-sleep'}`}>
+      <PixelArt rows={ROBOT_ROWS} palette={ROBOT_PALETTE} size={9} title="หุ่นยนต์ผู้ช่วย" />
+    </span>
+  );
+}
+
+interface Scene {
   chapter: string;
   text: string;
   scene: ReactNode;
 }
 
-const heroRow = (
-  <div className="flex items-end justify-center gap-4 md:gap-8">
-    <PixelHero variant={1} size={7} />
-    <PixelHero variant={2} size={7} />
-    <PixelHero variant={3} size={7} />
-  </div>
-);
-
-const robot = (
-  <span className="hero-bob inline-block">
-    <PixelArt rows={ROBOT_ROWS} palette={ROBOT_PALETTE} size={9} title="หุ่นยนต์ผู้ช่วย" />
-  </span>
-);
-
-// เนื้อเรื่องสั้นๆ 4 ฉาก (ไม่แต่งข้อมูลจริงของทีมเพิ่ม)
-const PANELS: Panel[] = [
+// เนื้อเรื่องเปิดเกม: ใช้ข้อมูลจริงของทีม (ชื่อ สาขา บทบาท ผลงาน) เติมสีสันด้วยฉากสมมุติ
+const SCENES: Scene[] = [
   {
-    chapter: 'CHAPTER 1 · 03:00 น.',
-    text: 'ตีสาม… ห้องแล็บที่ไฟยังไม่เคยดับ มีสามคนยังนั่งจ้องหน้าจออยู่',
-    scene: heroRow,
+    chapter: 'PROLOGUE',
+    text: 'เมืองหลับใหลไปหมดแล้ว… เหลือแค่ห้องแล็บเดียวที่ไฟยังติดอยู่',
+    scene: <p className="font-pixel text-3xl md:text-5xl text-hero-gold blink-soft">03:07</p>,
   },
   {
-    chapter: 'CHAPTER 2 · THE TEAM',
-    text: 'เพชร พีซ และกัน นักศึกษา AI & Data Science ผู้ได้ฉายาว่า "ยังไม่ได้นอน"',
-    scene: heroRow,
+    chapter: 'CHAPTER 1 · THE TEAM',
+    text: 'ข้างในมีนักศึกษา AI & Data Science สามคน กาแฟเย็นไปนานแล้ว แต่พวกเขายัง… "ยังไม่ได้นอน"',
+    scene: <Heroes enter />,
   },
   {
-    chapter: 'CHAPTER 3 · THE QUEST',
-    text: 'ภารกิจของพวกเขาคือสร้าง AI ผู้ช่วยที่รู้จักทั้งทีมดีที่สุด ให้ใครก็ถามเรื่องทักษะและผลงานได้ทันที',
-    scene: robot,
+    chapter: 'PLAYER 1 · เพชร',
+    text: 'เพชร อัศวินแห่งโค้ด เขียนได้ทั้งหน้าบ้านและหลังบ้าน แถมสอนให้ AI รู้จักทั้งทีม',
+    scene: <Heroes focus={1} />,
   },
   {
-    chapter: 'CHAPTER 4 · START',
-    text: 'แล้ว NPC ผู้ช่วยก็ตื่นขึ้น… คุณพร้อมจะผจญภัยไปกับพวกเขาหรือยัง?',
-    scene: (
-      <div className="flex items-end justify-center gap-6">
-        <PixelHero variant={1} size={7} />
-        {robot}
-      </div>
-    ),
+    chapter: 'PLAYER 2 · พีซ',
+    text: 'พีซ จอมปราชญ์ข้อมูล ท่อข้อมูลของเขาไหลเองอัตโนมัติ ไม่ต้องรอให้ใครมานั่งทำมือ',
+    scene: <Heroes focus={2} />,
+  },
+  {
+    chapter: 'PLAYER 3 · กัน',
+    text: 'กัน นักบินโดรน ดูแลหน้าตาเว็บให้สวย และวิเคราะห์ข้อมูลจากภารกิจบินได้ทุกเที่ยว',
+    scene: <Heroes focus={3} />,
+  },
+  {
+    chapter: 'CHAPTER 2 · THE QUEST',
+    text: 'คืนนี้พวกเขามีภารกิจเดียว สร้าง AI ที่รู้จักทั้งทีมดีกว่าใคร… แล้วหน้าจอก็สว่างวาบ',
+    scene: <Robot />,
+  },
+  {
+    chapter: 'FINAL SCENE',
+    text: 'หุ่นยนต์ลืมตาขึ้น "สวัสดี ผมคือผู้ช่วยของทีม ยังไม่ได้นอน ถามผมได้ทุกเรื่อง ยินดีต้อนรับสู่ PIXEL HERO QUEST!"',
+    scene: <Robot awake />,
   },
 ];
 
-function PanelView({ panel, onNext }: { panel: Panel; onNext: () => void }) {
-  const { shown, done, skip } = useTypewriter(panel.text, true, 32);
+const DWELL_MS = 1500; // พักหลังพิมพ์จบก่อนขึ้นฉากถัดไป
+
+function SceneView({ scene, onNext }: { scene: Scene; onNext: () => void }) {
+  const { shown, done, skip } = useTypewriter(scene.text, true, 30);
+
+  // เล่นต่อเองเมื่อพิมพ์จบ
+  useEffect(() => {
+    if (!done) return;
+    const id = window.setTimeout(onNext, DWELL_MS);
+    return () => window.clearTimeout(id);
+  }, [done, onNext]);
+
   return (
     <div
-      className="w-full max-w-3xl cursor-pointer"
+      className="w-full max-w-3xl cursor-pointer story-fade"
       onClick={() => (done ? onNext() : skip())}
       role="button"
       tabIndex={-1}
     >
-      <p className="font-pixel text-[9px] md:text-xs text-hero-cyan tracking-widest text-center mb-6">{panel.chapter}</p>
-      <div className="min-h-[200px] flex items-end justify-center mb-6">{panel.scene}</div>
-      <div className="pixel-box pixel-box--cyan p-5 text-sm md:text-base leading-relaxed min-h-[96px]">
+      <p className="font-pixel text-[9px] md:text-xs text-hero-cyan tracking-widest text-center mb-6">{scene.chapter}</p>
+      <div className="min-h-[210px] flex items-end justify-center mb-6">{scene.scene}</div>
+      <div className="pixel-box pixel-box--cyan p-5 text-sm md:text-base leading-relaxed min-h-[110px]">
         <span className="name-tag font-pixel">STORY</span>
-        <p className={done ? 'dialog-next' : 'type-cursor'}>{shown}</p>
+        <p className={done ? '' : 'type-cursor'}>{shown}</p>
       </div>
     </div>
   );
 }
 
-/* ฉากเปิดเรื่อง: แตะ/Enter/Space เพื่อไปต่อ, SKIP เพื่อข้ามทั้งหมด */
+/* ฉากเปิดเรื่องที่เล่นต่อเองทีละฉาก: แตะเพื่อเร่ง, SKIP หรือ Esc เพื่อข้ามทั้งหมด */
 export default function IntroStory({ onFinish }: { onFinish: () => void }) {
   const [index, setIndex] = useState(0);
-  const last = index === PANELS.length - 1;
 
   const next = useCallback(() => {
+    if (index >= SCENES.length - 1) {
+      onFinish();
+      return;
+    }
     sfx.confirm();
-    if (last) onFinish();
-    else setIndex((i) => i + 1);
-  }, [last, onFinish]);
+    setIndex(index + 1);
+  }, [index, onFinish]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -103,10 +138,10 @@ export default function IntroStory({ onFinish }: { onFinish: () => void }) {
         SKIP ▶▶
       </button>
 
-      <PanelView key={index} panel={PANELS[index]} onNext={next} />
+      <SceneView key={index} scene={SCENES[index]} onNext={next} />
 
       <div className="mt-6 flex items-center gap-3">
-        {PANELS.map((_, i) => (
+        {SCENES.map((_, i) => (
           <span
             key={i}
             className={`inline-block h-2 w-2 ${i === index ? 'bg-hero-gold' : 'bg-slate-600'}`}
@@ -114,12 +149,6 @@ export default function IntroStory({ onFinish }: { onFinish: () => void }) {
           />
         ))}
       </div>
-
-      {last && (
-        <button type="button" onClick={next} className="pixel-btn pixel-btn--gold font-pixel text-xs mt-6 blink-soft">
-          ▶ เริ่มผจญภัย
-        </button>
-      )}
     </section>
   );
 }
