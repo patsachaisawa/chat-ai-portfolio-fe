@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import EnergyBar from '../components/EnergyBar';
 import PixelHero from '../components/PixelHero';
 import type { HeroMood } from '../components/PixelHero';
@@ -30,8 +30,14 @@ interface SendOptions {
   missionId?: string;
 }
 
-const WELCOME_TEXT =
-  'สวัสดีครับ! ผมคือ AI Assistant ประจำโปรไฟล์ของคุณภัทษชัย สว่างกัลป์ คุณสามารถสอบถามเกี่ยวกับ ทักษะ โปรเจกต์ หรือประสบการณ์การทำงานได้เลยครับ ✨';
+const ASSISTANT_NAMES: Record<1 | 2 | 3, string> = {
+  1: 'คุณภัทษชัย สว่างกัลป์ (เพชร)',
+  2: 'คุณปาณัสม์ เบญจวรรณ (พีซ)',
+  3: 'คุณกันต์ธนวิท ทองกร (กัน)',
+};
+
+const welcomeText = (hero: 1 | 2 | 3) =>
+  `สวัสดีครับ! ผมคือ AI Assistant ประจำโปรไฟล์ของ${ASSISTANT_NAMES[hero]} คุณสามารถสอบถามเกี่ยวกับ ทักษะ โปรเจกต์ หรือประสบการณ์การทำงานได้เลยครับ ✨`;
 
 // คำสั่งด่วน = 3 ภารกิจแรก (ก็นับเป็นการเคลียร์ภารกิจด้วย)
 const QUICK_MISSIONS = MISSIONS.slice(0, 3);
@@ -76,8 +82,11 @@ function AssistantBubble({
 
 export default function Chat() {
   const { unlock } = useGameFx();
+  const [searchParams] = useSearchParams();
+  const heroParam = Number(searchParams.get('hero'));
+  const hero: 1 | 2 | 3 = heroParam === 2 || heroParam === 3 ? heroParam : 1;
   const { quota, refresh: refreshQuota } = useQuota(API_BASE_URL);
-  const [messages, setMessages] = useState<Message[]>([{ id: 'welcome', sender: 'assistant', text: WELCOME_TEXT }]);
+  const [messages, setMessages] = useState<Message[]>([{ id: 'welcome', sender: 'assistant', text: welcomeText(hero) }]);
   const [typingId, setTypingId] = useState<string | null>('welcome');
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -282,10 +291,10 @@ export default function Chat() {
           <div className="pixel-box pixel-box--cyan p-3 md:p-5 flex md:flex-col items-center gap-3 md:gap-4 w-full">
             <span className="name-tag font-pixel">AI HERO</span>
             <div className="md:hidden">
-              <PixelHero size={3} mood={mood} />
+              <PixelHero size={3} mood={mood} variant={hero} />
             </div>
             <div className="hidden md:block pt-2">
-              <PixelHero size={7} mood={mood} />
+              <PixelHero size={7} mood={mood} variant={hero} />
             </div>
             <div className="flex-1 md:flex-none w-full text-left md:text-center space-y-3">
               <div>
