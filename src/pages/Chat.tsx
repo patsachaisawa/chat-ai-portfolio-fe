@@ -5,7 +5,7 @@ import EnergyBar from '../components/EnergyBar';
 import PixelHero from '../components/PixelHero';
 import type { HeroMood } from '../components/PixelHero';
 import { useGameFx } from '../lib/gameFx';
-import { BOSS_LABEL, BOSS_PROMPT, MISSIONS, fillName, loadCleared, saveCleared } from '../lib/missions';
+import { BOSS_LABEL, BOSS_PROMPT, MISSIONS, missionQuestion, loadCleared, saveCleared } from '../lib/missions';
 import { sfx } from '../lib/sfx';
 import { useQuota } from '../lib/useQuota';
 import { useTypewriter } from '../lib/useTypewriter';
@@ -360,14 +360,14 @@ export default function Chat() {
                     <button
                       key={m.id}
                       type="button"
-                      onClick={() => handleMission(m.id, fillName(m.question, MEMBER_LABELS[hero].ask))}
+                      onClick={() => handleMission(m.id, missionQuestion(m, hero, MEMBER_LABELS[hero].ask))}
                       disabled={busy}
                       className="pixel-btn pixel-btn--sm flex-col items-start justify-start text-left gap-1"
                     >
                       <span className="font-pixel text-[8px] text-hero-cyan">
                         {'★'.repeat(m.stars)} {m.tag} {done && <span className="text-emerald-300">✔ CLEARED</span>}
                       </span>
-                      <span className="text-xs leading-snug">{fillName(m.question, MEMBER_LABELS[hero].ask)}</span>
+                      <span className="text-xs leading-snug">{missionQuestion(m, hero, MEMBER_LABELS[hero].ask)}</span>
                     </button>
                   );
                 })}
@@ -382,11 +382,11 @@ export default function Chat() {
               <button
                 key={m.id}
                 type="button"
-                onClick={() => handleMission(m.id, fillName(m.question, MEMBER_LABELS[hero].ask))}
+                onClick={() => handleMission(m.id, missionQuestion(m, hero, MEMBER_LABELS[hero].ask))}
                 disabled={busy}
                 className="pixel-btn pixel-btn--sm"
               >
-                {fillName(m.question, MEMBER_LABELS[hero].ask)}
+                {missionQuestion(m, hero, MEMBER_LABELS[hero].ask)}
               </button>
             ))}
             <button
