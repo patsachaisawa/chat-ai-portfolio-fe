@@ -409,7 +409,7 @@ function MainHome() {
         <div className="max-w-6xl mx-auto px-4 md:px-6 py-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <PixelArt rows={ROBOT_ROWS} palette={ROBOT_PALETTE} size={3} />
-            <span className="text-base md:text-lg font-bold text-hero-gold">ยังไม่ได้นอน</span>
+            <span className="text-base md:text-lg font-bold text-hero-gold">นอนแล้ว</span>
           </div>
           <div className="flex items-center gap-2 md:gap-4">
             <a href="#skills" className="hidden sm:inline font-pixel text-[9px] text-slate-200 hover:text-hero-gold">
